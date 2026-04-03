@@ -17,7 +17,7 @@
 
     public void ShowReciept()
     {
-        
+        Console.WriteLine($"Your {DrinkName} {CalculatedPrice():C2}");
     }
 
 }
@@ -35,12 +35,13 @@ public class Coffee : Drink
 
     public void AddSugar()
     {
-        
+         Console.WriteLine($"Adding {_sugarGrams}g sugar for the {DrinkName}.");
+
     }
 
     public void SteamMilk()
     {
-        
+        Console.WriteLine($"Steaming {_milkType} for the {DrinkName}.");
     }
 }
 
@@ -57,12 +58,12 @@ public class Tea : Drink
 
     public void Steep()
     {
-        
+        Console.WriteLine($"Steeping exactly {_steepTime} minutes for the {DrinkName}.");
     }
 
     public void RemoveBag()
     {
-        
+        Console.WriteLine($"Remove tea bag for the {DrinkName}.");
     }
 }
 
@@ -142,33 +143,97 @@ public class Employee
     {
         EmployeeName = name;
         _employeeID = id;
-        _totalStaff++;
+    }
+    public void ProcessPayment(double amount)
+    {
+        Console.WriteLine($"\n{EmployeeName} processing payment of {amount:C2}...");
+        Console.WriteLine("Payment accepted. Thank You!");
     }
 }
 public class Customer
 {
     public string CustomerName;
-    private double _walletbalance = 25.00;
-    protected int LoyaltyPoints = 150;
+    private double _walletbalance;
+    protected int LoyaltyPoints;
     public List<Drink> PurcahsedItems = new List<Drink>();
 
-    public Customer(string name)
+    public Customer(string name, double balance, int points)
     {
         CustomerName = name;
+        _walletbalance = balance;
+        LoyaltyPoints = points;
     }
 
     public OrderDrink(Drink purchase, Employee barista)
     {
-        
+        double cost = item.CalculatedPrice();
+
+        if (cost <= _walletbalance)
+        {
+            _walletbalance -= cost;
+            LoyaltyPoints += 25;
+            PurcahsedItems.Add(item);
+            Console.WriteLine($"Sucess! Wallet: {_walletbalance:C2} | Points: {LoyaltyPoints}");
+        }
+        else
+            Console.WriteLine($"{CustomerName}, you need {cost:C2} to purchase but you only have {_walletbalance}.");
     }
 
     public void ViewBag()
     {
-        
+        Console.WriteLine($"\n{CustomerName} views the bag:");
+        foreach (Drink item in PurcahsedItems)
+        {
+            item.ShowReciept();
+        }
     }
 
     public double CalcualteGrandTotal()
     {
-        
+        double total = 0.0;
+        foreach (Drink item in PurcahsedItems)
+        {
+          total += item.CalculatedPrice();
+        }
+        return total;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        //build our menu
+        Coffee MorningJoe = new Coffee("House Blend", 2.50, 0, "None");
+        Tea EarlGrey = new Tea("London Fog", 3.50, 3, "Earl Grey / Bergamot");
+
+        Employee Alice = new Employee("Alice Smith", 101);
+
+        //Customer visits
+        Customer JohnDoe = new Customer("John Doe", 25.00, 150);
+
+        // Scenario 1
+        Console.WriteLine($"SCENE 1 - Customer {JohnDoe.CustomerName} orders two drinks from {Alice.EmployeeName}.");
+        JohnDoe.OrderDrink(MorningJoe, Alice);
+        JohnDoe.OrderDrink(EarlGrey, Alice);
+
+        Console.WriteLine($"\nBarista {Alice.EmployeeName} prepares the drinks:");
+        Console.WriteLine("\nPreparing MorningJoe");
+        MorningJoe.AddSugar();
+        MorningJoe.SteamMilk();
+
+        Console.WriteLine("\nPreparing EarlGrey");
+        EarlGrey.Steep();
+        EarlGrey.RemoveBag();
+
+        // Console.WriteLine($"Customer {JohnDoe.CustomerName}views the bag:");
+        JohnDoe.ViewBag();
+        Console.WriteLine($"Grand Total: {JohnDoe.CalcualteGrandTotal():C2}");
+
+        Console.WriteLine("Item Details:");
+        MorningJoe.ShowReciept();
+        EarlGrey.ShowReciept();
+
+        Alice.ProcessPayment(JohnDoe.CalcualteGrandTotal());
     }
 }
