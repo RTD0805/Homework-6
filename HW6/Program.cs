@@ -1,4 +1,6 @@
-﻿public class Drink
+﻿using System.Runtime.CompilerServices;
+
+public class Drink
 {
     protected string DrinkName;
     protected double BasePrice;
@@ -80,12 +82,12 @@ public class Juice : Drink
 
     public void PressFruit()
     {
-        
+        Console.WriteLine($"Pressing fruit for the {DrinkName}.");
     }
 
     public void Strain()
     {
-        
+    Console.WriteLine($"{DrinkName} with pulp level {_pulpLevel}.");
     }
 }
 
@@ -102,34 +104,50 @@ public class Smoothie : Drink
 
     public void Blend()
     {
-        
+        Console.WriteLine($"Blending {FruitType} with a {_baseLiquid} base for the {DrinkName}.");
     }
 
     public void AddProtein()
     {
-        
+        Console.WriteLine($"Add protein for the {DrinkName}.");
     }
 }
 
 public class SeasonalSpecial : Drink
 {
-    private static int _limitedQuantity;
+    private static int _limitedQuantity = 50;
     private string _expirationDate;
+   
 
     public SeasonalSpecial(string name, double price, string expirationDate):base(name, price)
     {
         _expirationDate = expirationDate;
-        _limitedQuantity--;
     }
 
     public void CheckAvailability()
     {
-        
+            if (_limitedQuantity > 0)
+            {
+                Console.WriteLine($"{DrinkName} is available. Limited quantity: {_limitedQuantity}");
+            }
+            else
+            {
+                Console.WriteLine($"{DrinkName} is sold out.");
+            }
     }
 
     public void ApplySeasonalDiscount()
     {
-        
+        if (_limitedQuantity > 0)
+        {
+            _limitedQuantity--;
+            double discountPrice = BasePrice * 0.9; // 10% discount
+            Console.WriteLine($"Applying seasonal discount for {DrinkName}. New price: {discountPrice:C2}");
+        }
+        else
+        {
+            Console.WriteLine($"Cannot apply discount. {DrinkName} is sold out.");
+        }
     }
 }
 
@@ -137,7 +155,6 @@ public class Employee
 {
     public string EmployeeName;
     private int _employeeID;
-    private static int _totalStaff;
 
     public Employee(string name, int id)
     {
@@ -164,7 +181,7 @@ public class Customer
         LoyaltyPoints = points;
     }
 
-    public OrderDrink(Drink purchase, Employee barista)
+    public void OrderDrink(Drink item, Employee barista)
     {
         double cost = item.CalculatedPrice();
 
@@ -205,7 +222,15 @@ class Program
     {
         //build our menu
         Coffee MorningJoe = new Coffee("House Blend", 2.50, 0, "None");
+        Coffee FancyLatte = new Coffee("Vanilla Oat Latte", 4.75, 4, "Oat Milk");
         Tea EarlGrey = new Tea("London Fog", 3.50, 3, "Earl Grey / Bergamot");
+        Tea GreenTea = new Tea("Zen Matcha", 4.00, 2, "Ceremonial Matcha");
+        Juice ClassicJuice = new Juice("Classic Orange", 3.00, 2, false);
+        Juice GreenPower = new Juice("Emerald Squeeze", 6.50, 1, true);
+        Smoothie BerryBlast = new Smoothie("Wild Berry", 5.50, "Mixed Berries", "Coconut Water");
+        Smoothie BulkUp = new Smoothie("Protein Power", 7.00, "Banana", "Almond Milk");
+        SeasonalSpecial CherryBlossom = new SeasonalSpecial("Cherry Blossom Latte", 5.50, "2026-05-01");
+        SeasonalSpecial PeachSummer = new SeasonalSpecial ("Peach Summer Special", 5.95, "2026-08-31");
 
         Employee Alice = new Employee("Alice Smith", 101);
 
@@ -235,5 +260,39 @@ class Program
         EarlGrey.ShowReciept();
 
         Alice.ProcessPayment(JohnDoe.CalcualteGrandTotal());
+
+    // Scenario 2
+    Customer JaneSmith = new Customer("Jane Smith", 50.00, 500);
+    Employee Bob = new Employee("Bob Jones", 202);
+
+    Console.WriteLine($"\nSCENE 2 - Customer {JaneSmith.CustomerName} orders three drinks from {Bob.EmployeeName}");
+
+    JaneSmith.OrderDrink(GreenPower, Bob);
+    JaneSmith.OrderDrink(BerryBlast, Bob);
+    JaneSmith.OrderDrink(CherryBlossom, Bob);
+
+    Console.WriteLine($"\nBarista {Bob.EmployeeName} Prepares the Drinks:\n");
+
+    Console.WriteLine("Preparing GreenPower:");
+    GreenPower.PressFruit();
+    GreenPower.Strain();
+
+    Console.WriteLine("\nPreparing BerryBlast:");
+    BerryBlast.Blend();
+    BerryBlast.AddProtein();
+
+    Console.WriteLine("\nPreparing CherryBlossom:");
+    CherryBlossom.CheckAvailability();
+    CherryBlossom.ApplySeasonalDiscount();
+
+    JaneSmith.ViewBag();
+    Console.WriteLine($"\nGrand Total: {JaneSmith.CalcualteGrandTotal():C2}");
+
+    Console.WriteLine("\nItem Details:");
+    GreenPower.ShowReciept();
+    BerryBlast.ShowReciept();
+    CherryBlossom.ShowReciept();
+
+    Bob.ProcessPayment(JaneSmith.CalcualteGrandTotal());
     }
 }
